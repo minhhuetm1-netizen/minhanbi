@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MinhAn AI — Hệ thống Xử lý Cơ hội Bán hàng B2B</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="chart.umd.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --canvas-olive: #4A4E42;
+      --electric-lime: #D4EE0E;
+      --paper-white: #F7F7F4;
+      --paper-header: #EFECE6;
+      --ink-black: #0C0E08;
+    }
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: var(--canvas-olive);
+      color: var(--ink-black);
+    }
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(2deg); }
+    }
+    .animate-float { animation: floatSoft 5.5s ease-in-out infinite; }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-enter { animation: fadeSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px) scale(0.95); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    .toast-enter { animation: toastIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    button { transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1); }
+    button:active { transform: scale(0.97); }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(12, 14, 8, 0.22); border-radius: 99px; }
+
+    @media print {
+      body { background: white !important; padding: 0 !important; }
+      #cover-page, #rail-step-1, #rail-step-2, #rail-step-3, #rail-step-4, #rail-step-5,
+      .md\:col-span-4, #flowchart-strip, #bottom-confirm-bar, .bg-[#0B0D08].text-white, #toast-container,
+      .no-print {
+        display: none !important;
+      }
+      #main-workspace, .md\:col-span-8 {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .overflow-y-auto {
+        overflow: visible !important;
+        max-height: none !important;
+      }
+      #step-panel-5 {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .page-break-avoid {
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 sm:p-6 antialiased">
+
+  <!-- ========================================================= -->
+  <!-- SCREEN 1: TRANG MỞ ĐẦU (GIVINGLY SPLIT-PANEL OVERLAP)      -->
+  <!-- ========================================================= -->
+  <div id="cover-page" class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-12 items-center animate-enter">
+
+    <!-- LEFT ELEVATED ELECTRIC LIME CARD -->
+    <div class="md:col-span-5 bg-[#D4EE0E] rounded-2xl p-7 sm:p-8 shadow-[0_26px_60px_-14px_rgba(0,0,0,0.5)] relative z-20 md:-mr-5 md:py-10 flex flex-col justify-between min-h-[520px]">
+      <!-- Brand Wordmark Top-Right -->
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-bold uppercase tracking-widest text-[#0C0E08]/60">AI301 • Đề 01</span>
+        <span class="text-3xl font-black tracking-tight text-[#0C0E08]">MinhAn</span>
+      </div>
+
+      <!-- Center Minimalist Vector Illustration (Matching Givingly Hand + Spark Heart) -->
+      <div class="my-6 flex items-center justify-center relative">
+        <svg class="w-48 h-48 animate-float" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Confetti symbols -->
+          <circle cx="38" cy="48" r="6" stroke="#8CA300" stroke-width="2.5"/>
+          <path d="M170 42 L178 50 M178 42 L170 50" stroke="#7A8F00" stroke-width="3" stroke-linecap="round"/>
+          <path d="M40 175 L50 185 M50 175 L40 185" stroke="#7A8F00" stroke-width="3.5" stroke-linecap="round"/>
+          <circle cx="104" cy="186" r="8" fill="#8CA300" opacity="0.6"/>
+          <!-- Rays -->
+          <path d="M110 34 V46 M158 54 L149 62 M174 96 H162 M64 54 L73 62 M48 96 H60" stroke="#7A8F00" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Glowing White Deal Shield / Heart -->
+          <path d="M110 124 C110 124 72 100 72 76 C72 62 83 52 96 52 C104 52 110 58 110 58 C110 58 116 52 124 52 C137 52 148 62 148 76 C148 100 110 124 110 124 Z" fill="#FFFFFF"/>
+          <path d="M110 114 C110 114 82 96 82 78 C82 68 90 61 98 61 C104 61 110 66 110 66 C110 66 116 61 122 61 C130 61 138 68 138 78 C138 96 110 114 110 114 Z" fill="#A3BC00" opacity="0.75"/>
+          <!-- Supporting Hand -->
+          <path d="M45 148 L72 132 C78 128 86 128 94 132 L122 138 C128 140 132 146 128 151 C124 155 114 153 102 150 L148 140 C155 138 162 142 162 148 C162 153 156 157 148 160 L108 172 C95 176 80 175 68 168 L45 156 Z" fill="#FFFFFF"/>
+          <path d="M32 140 L52 134 L62 166 L42 172 Z" fill="#7E9400"/>
+        </svg>
+      </div>
+
+      <!-- Bottom Copy & Start CTA -->
+      <div class="space-y-4">
+        <div>
+          <h2 class="text-2xl font-black leading-tight text-[#0C0E08]">
+            Xử lý cơ hội B2B
+          </h2>
+          <p class="text-xs text-[#0C0E08]/75 mt-2 leading-relaxed">
+            AI xử lý dữ liệu &amp; báo cáo 5 bước.
+          </p>
+        </div>
+
+        <button onclick="startApp()" class="w-full bg-[#0B0D08] hover:bg-black text-white font-bold text-xs sm:text-sm py-3.5 rounded-lg shadow-md">
+          Bắt đầu ngay →
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT CLEAN OFF-WHITE CARD -->
+    <div class="md:col-span-7 bg-[#F7F7F4] rounded-2xl overflow-hidden shadow-xl relative z-10 md:pl-6 mt-4 md:mt-0">
+      <!-- Top Playful Illustration Strip -->
+      <div class="bg-[#EFECE6] h-36 relative overflow-hidden flex items-center justify-center border-b border-black/10">
+        <svg class="w-full h-full" viewBox="0 0 500 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="90" cy="34" r="6" stroke="#8CA300" stroke-width="2"/>
+          <path d="M135 28 L142 35 M142 28 L135 35" stroke="#8CA300" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="420" cy="40" r="8" fill="#D4EE0E"/>
+          <!-- Playful stylized AI Document / Avocado-palette mascot -->
+          <rect x="195" y="28" width="66" height="84" rx="22" transform="rotate(-12 195 28)" fill="#8CA300"/>
+          <rect x="201" y="34" width="54" height="72" rx="18" transform="rotate(-12 201 34)" fill="#D4EE0E"/>
+          <circle cx="226" cy="84" r="14" fill="#6F8200"/>
+          <circle cx="222" cy="54" r="4" fill="#FFFFFF"/><circle cx="222" cy="54" r="2" fill="#0C0E08"/>
+          <circle cx="235" cy="52" r="4" fill="#FFFFFF"/><circle cx="235" cy="52" r="2" fill="#0C0E08"/>
+          <!-- Abstract card cloud right -->
+          <path d="M325 32 C355 20 398 35 405 68 C412 100 380 124 345 118 C312 112 295 85 304 58 C308 45 316 37 325 32 Z" fill="#FFFFFF"/>
+          <circle cx="354" cy="76" r="22" fill="#D4EE0E" opacity="0.85"/>
+        </svg>
+      </div>
+
+      <!-- Content Area -->
+      <div class="p-6 sm:p-8 space-y-5">
+        <div>
+          <h1 class="text-xl sm:text-2xl font-black text-[#0C0E08] leading-snug">
+            Hệ thống Sales AI Agent
+          </h1>
+          <div class="flex items-center gap-2 mt-1.5 text-xs font-semibold text-[#0C0E08]/75">
+            <span class="w-5 h-5 rounded bg-[#0C0E08] text-[#D4EE0E] flex items-center justify-center text-[10px] font-black">M</span>
+            <span>Minh An B2B • 6 NVKD</span>
+          </div>
+        </div>
+
+        <!-- Signature Thin-Border 2-Column Split Grid -->
+        <div class="border-t border-b border-black/15 grid grid-cols-1 sm:grid-cols-2 text-xs">
+          <div class="py-3 sm:pr-5 sm:border-r border-black/15 space-y-1">
+            <span class="font-extrabold text-[#0C0E08] block">Tổng quan</span>
+            <p class="text-[#0C0E08]/70 leading-relaxed">
+              Đọc đa file, AI Mapping &amp; kiểm soát chiết khấu tự động.
+            </p>
+          </div>
+          <div class="py-3 sm:pl-5 flex flex-col justify-between gap-2">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <span class="text-[11px] text-[#0C0E08]/60 block">Tiếp nhận:</span>
+                <strong class="text-base font-black text-[#0C0E08]">180 req/tuần</strong>
+              </div>
+              <div class="bg-[#D4EE0E] px-2.5 py-1 rounded-md">
+                <span class="text-[10px] text-[#0C0E08]/75 block leading-none">Phân loại:</span>
+                <strong class="text-xs font-black text-[#0C0E08]">4 Nhóm</strong>
+              </div>
+            </div>
+            <div class="w-full bg-black/10 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-[#D4EE0E] h-full w-4/5 rounded-full"></div>
+            </div>
+            <div class="flex items-center gap-2 text-[11px] font-bold text-[#0C0E08]/75">
+              <span>📅</span>
+              <span>Quy trình 5 bước</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Engine / API Key Config -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div>
+            <label class="block text-[10px] font-bold uppercase text-[#0C0E08]/60 mb-1">Mô hình AI</label>
+            <select id="cfg-provider" onchange="toggleApiKeyInput()" class="w-full bg-white border border-black/15 rounded-lg px-3 py-2 font-semibold focus:outline-none">
+              <option value="Gemini" selected>Google Gemini (Flash)</option>
+              <option value="Rule-based + AI">Rule-based (Offline)</option>
+              <option value="OpenAI">OpenAI GPT</option>
+            </select>
+          </div>
+          <div id="cfg-apikey-wrap">
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-[10px] font-bold uppercase text-[#0C0E08]/60">API Key</label>
+              <button onclick="testGeminiConnection()" id="btn-test-ai" class="text-[10px] font-extrabold bg-[#D4EE0E] px-2 py-0.5 rounded hover:brightness-95">🔌 Test API</button>
+            </div>
+            <input id="cfg-apikey" type="password" placeholder="✓ Đã cấu hình trên server..." class="w-full bg-white border border-black/15 rounded-lg px-3 py-2 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Thiết lập thông tin doanh nghiệp (Trang mở đầu) -->
+        <div class="bg-white border border-black/15 rounded-xl p-3.5 space-y-2.5 text-xs">
+          <div class="flex items-center justify-between border-b border-black/10 pb-2">
+            <strong class="text-[11px] font-black uppercase text-[#0C0E08] flex items-center gap-1.5">
+              <span>🏢</span> Thông tin doanh nghiệp
+            </strong>
+            <span class="text-[10px] text-rose-600 font-extrabold">* Bắt buộc dòng 1 &amp; 2</span>
+          </div>
+          <div class="space-y-2">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label for="cover-biz-name" class="text-[10px] font-bold text-[#0C0E08]">1. Tên doanh nghiệp <span class="text-rose-600 font-bold">*</span></label>
+              </div>
+              <input type="text" id="cover-biz-name" placeholder="Ví dụ: Tên Doanh Nghiệp / Tổ chức" class="w-full bg-[#F7F7F4] border border-black/15 focus:border-black rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none">
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label for="cover-biz-type" class="text-[10px] font-bold text-[#0C0E08]">2. Loại hình doanh nghiệp <span class="text-rose-600 font-bold">*</span></label>
+              </div>
+              <input type="text" id="cover-biz-type" list="cover-biz-type-list" placeholder="Ví dụ: Thương mại &amp; Phân phối B2B, Bán lẻ..." class="w-full bg-[#F7F7F4] border border-black/15 focus:border-black rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none">
+              <datalist id="cover-biz-type-list">
+                <option value="Thương mại &amp; Phân phối B2B">
+                <option value="Bán buôn thiết bị &amp; Vật tư công nghiệp">
+                <option value="Bán lẻ / Chuỗi phân phối / E-commerce">
+                <option value="Sản xuất &amp; Gia công sản phẩm">
+                <option value="Dịch vụ &amp; Đấu thầu dự án B2B">
+              </datalist>
+            </div>
+            <div>
+              <label for="cover-biz-extra" class="block text-[10px] font-semibold text-[#0C0E08]/70 mb-1">3. Thông tin bổ sung (tùy chọn)</label>
+              <input type="text" id="cover-biz-extra" placeholder="Quy mô 6 NVKD, phân phối 3 miền..." class="w-full bg-[#F7F7F4] border border-black/15 focus:border-black rounded-lg px-2.5 py-1.5 text-xs focus:outline-none">
+            </div>
+            <div>
+              <label for="cover-biz-problem" class="block text-[10px] font-semibold text-[#0C0E08]/70 mb-1">4. Vấn đề cần phân tích (tùy chọn)</label>
+              <input type="text" id="cover-biz-problem" placeholder="Chiết khấu VIP, giảm hoàn hàng, tăng biên margin..." class="w-full bg-[#F7F7F4] border border-black/15 focus:border-black rounded-lg px-2.5 py-1.5 text-xs focus:outline-none">
+            </div>
+          </div>
+        </div>
+
+        <button onclick="startApp()" class="w-full bg-[#0B0D08] hover:bg-black text-white font-bold text-sm py-3 rounded-lg shadow transition">
+          Bắt đầu →
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- SCREEN 2: MAIN 5-STEP WORKSPACE (GIVINGLY SPLIT-PANEL)     -->
+  <!-- ========================================================= -->
+  <div id="main-workspace" class="hidden max-w-[1340px] w-full grid grid-cols-1 md:grid-cols-12 items-stretch animate-enter">
+
+    <!-- LEFT ELEVATED ELECTRIC LIME RAIL -->
+    <div class="md:col-span-4 bg-[#D4EE0E] rounded-2xl p-6 shadow-[0_26px_60px_-14px_rgba(0,0,0,0.45)] relative z-20 md:-mr-4 md:my-2 flex flex-col justify-between gap-5">
+      <div class="space-y-5">
+        <!-- Brand & Return Cover -->
+        <div class="flex items-center justify-between">
+          <span class="text-2xl font-black tracking-tight text-[#0C0E08]">MinhAn</span>
+          <button onclick="backToCover()" class="text-[11px] font-bold bg-[#0C0E08]/10 hover:bg-[#0C0E08]/20 text-[#0C0E08] px-2.5 py-1 rounded-md">
+            ⌂ Trang bìa
+          </button>
+        </div>
+
+        <!-- 5-Step Interactive Vertical Stepper -->
+        <div class="space-y-2">
+          <span class="text-[10px] font-extrabold uppercase tracking-wider text-[#0C0E08]/60 block">Tiến trình duyệt</span>
+
+          <div onclick="jumpStep(1)" id="rail-step-1" class="rounded-xl p-3 bg-[#0B0D08] text-white cursor-pointer flex items-center justify-between shadow-sm">
+            <div>
+              <span class="text-[10px] opacity-70 block">Bước 1</span>
+              <strong class="text-xs font-extrabold">Nhập &amp; Ánh xạ</strong>
+            </div>
+            <span id="rail-badge-1" class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#D4EE0E] text-[#0C0E08]">Đang mở</span>
+          </div>
+
+          <div onclick="jumpStep(2)" id="rail-step-2" class="rounded-xl p-3 bg-white/50 text-[#0C0E08]/70 cursor-pointer flex items-center justify-between">
+            <div>
+              <span class="text-[10px] opacity-70 block">Bước 2</span>
+              <strong class="text-xs font-extrabold">Làm sạch dữ liệu</strong>
+            </div>
+            <span id="rail-badge-2" class="text-[10px] font-bold px-2 py-0.5 rounded bg-black/10">Chờ duyệt</span>
+          </div>
+
+          <div onclick="jumpStep(3)" id="rail-step-3" class="rounded-xl p-3 bg-white/50 text-[#0C0E08]/70 cursor-pointer flex items-center justify-between">
+            <div>
+              <span class="text-[10px] opacity-70 block">Bước 3</span>
+              <strong class="text-xs font-extrabold">Phân tích &amp; Tính toán</strong>
+            </div>
+            <span id="rail-badge-3" class="text-[10px] font-bold px-2 py-0.5 rounded bg-black/10">Chờ duyệt</span>
+          </div>
+
+          <div onclick="jumpStep(4)" id="rail-step-4" class="rounded-xl p-3 bg-white/50 text-[#0C0E08]/70 cursor-pointer flex items-center justify-between">
+            <div>
+              <span class="text-[10px] opacity-70 block">Bước 4</span>
+              <strong class="text-xs font-extrabold">Báo cáo &amp; Nhận định</strong>
+            </div>
+            <span id="rail-badge-4" class="text-[10px] font-bold px-2 py-0.5 rounded bg-black/10">Chờ duyệt</span>
+          </div>
+
+          <div onclick="jumpStep(5)" id="rail-step-5" class="rounded-xl p-3 bg-white/50 text-[#0C0E08]/70 cursor-pointer flex items-center justify-between">
+            <div>
+              <span class="text-[10px] opacity-70 block">Bước 5</span>
+              <strong class="text-xs font-extrabold">Xuất báo cáo</strong>
+            </div>
+            <span id="rail-badge-5" class="text-[10px] font-bold px-2 py-0.5 rounded bg-black/10">Chờ duyệt</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Quick Context & Audit Log Button -->
+      <div class="space-y-2.5 pt-4 border-t border-black/15">
+        <div class="text-[11px] font-semibold text-[#0C0E08]/80 flex items-center justify-between">
+          <span>Nhật ký truy vết:</span>
+          <button onclick="openAuditModal()" class="underline font-extrabold text-[#0C0E08]">Audit Log (<span id="audit-count">0</span>)</button>
+        </div>
+        <button onclick="loadSampleWorkbook()" class="w-full bg-[#0B0D08] hover:bg-black text-white font-bold text-xs py-2.5 rounded-lg shadow">
+          ⚡ Nạp file mẫu (.xlsx)
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT CLEAN OFF-WHITE WORKSPACE CARD -->
+    <div class="md:col-span-8 bg-[#F7F7F4] rounded-2xl overflow-hidden shadow-xl relative z-10 md:pl-5 mt-4 md:mt-0 flex flex-col justify-between min-h-[640px]">
+
+      <!-- Top Paper Header Strip -->
+      <div class="bg-[#EFECE6] px-6 sm:px-8 py-3.5 border-b border-black/10 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <span id="ws-step-kicker" class="text-[10px] font-extrabold uppercase tracking-wider text-[#0C0E08]/60">Bước 1 / 5</span>
+          <h2 id="ws-step-title" class="text-lg font-black text-[#0C0E08]">1. Nhập &amp; Ánh xạ</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/sample_data_minh_an.xlsx" download="sample_data_minh_an.xlsx" class="text-[11px] font-bold bg-white border border-black/15 px-3 py-1.5 rounded-md hover:bg-black/5">
+            ⬇ Tải file mẫu
+          </a>
+          <span id="ws-status-pill" class="text-[11px] font-extrabold bg-[#D4EE0E] text-[#0C0E08] px-3 py-1.5 rounded-md">
+            Chờ dữ liệu
+          </span>
+        </div>
+      </div>
+
+      <!-- Mini Visual Flowchart Strip (Clean Minimalist Arrows) -->
+      <div id="flowchart-strip" class="bg-white/90 px-4 sm:px-8 py-2 border-b border-black/10 flex items-center gap-1.5 overflow-x-auto text-[10px] font-extrabold">
+        <span id="fc-node-1" class="px-2 py-0.5 rounded bg-[#0B0D08] text-[#D4EE0E] whitespace-nowrap">1. Nhập File</span>
+        <span class="text-black/35 font-bold whitespace-nowrap px-1">→</span>
+        <span id="fc-node-2" class="px-2 py-0.5 rounded bg-[#EFECE6] text-[#0C0E08]/70 whitespace-nowrap">2. Làm sạch</span>
+        <span class="text-black/35 font-bold whitespace-nowrap px-1">→</span>
+        <span id="fc-node-3" class="px-2 py-0.5 rounded bg-[#EFECE6] text-[#0C0E08]/70 whitespace-nowrap">3. Phân tích</span>
+        <span class="text-black/35 font-bold whitespace-nowrap px-1">→</span>
+        <span id="fc-node-4" class="px-2 py-0.5 rounded bg-[#EFECE6] text-[#0C0E08]/70 whitespace-nowrap">4. Báo cáo</span>
+        <span class="text-black/35 font-bold whitespace-nowrap px-1">→</span>
+        <span id="fc-node-5" class="px-2 py-0.5 rounded bg-[#EFECE6] text-[#0C0E08]/70 whitespace-nowrap">5. Xuất file</span>
+      </div>
+
+      <!-- DYNAMIC DATA VALIDATION ALERT BANNER (Active when file is empty, invalid columns, or all null) -->
+      <div id="data-validation-alert" class="hidden animate-enter mx-5 sm:mx-7 mt-4 rounded-2xl border-2 border-rose-500 bg-rose-50/95 p-4 sm:p-5 text-rose-950 shadow-md">
+        <div class="flex items-start gap-3.5">
+          <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl font-black shadow-xs">
+            ⚠️
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="flex items-center justify-between">
+              <h3 id="val-alert-title" class="text-xs sm:text-sm font-black text-rose-900 uppercase tracking-wide">
+                Cảnh báo: Tệp dữ liệu không hợp lệ để xử lý
+              </h3>
+              <button onclick="dismissValidationAlert()" class="text-rose-500 hover:text-rose-800 text-xs font-bold px-2 py-0.5 rounded hover:bg-rose-100 transition">
+                ✕ Đóng
+              </button>
+            </div>
+            <p id="val-alert-message" class="text-xs sm:text-sm font-semibold text-rose-900 leading-relaxed">
+              Tệp tải lên không chứa dữ liệu hợp lệ (0 dòng dữ liệu, toàn bộ ô rỗng hoặc cấu trúc không đọc được).
+            </p>
+            <div id="val-alert-detail" class="text-[11px] font-mono bg-white/80 border border-rose-200 rounded-lg p-2.5 text-rose-800 break-words">
+              Nguyên nhân: Không phát hiện bản ghi hợp lệ.
+            </div>
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <label for="file-input" class="cursor-pointer inline-flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs px-3.5 py-1.5 rounded-lg shadow transition">
+                <span>📁 Tải tệp dữ liệu khác</span>
+              </label>
+              <button onclick="loadSampleWorkbook(); dismissValidationAlert();" class="inline-flex items-center gap-1.5 bg-[#0B0D08] hover:bg-black text-[#D4EE0E] font-black text-xs px-3.5 py-1.5 rounded-lg shadow transition">
+                <span>⚡ Nạp file mẫu chuẩn</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REAL-TIME PROGRESS BAR & STATUS STRIP (Active during uploads & chunk processing) -->
+      <div id="global-progress-bar-wrap" class="hidden bg-[#0B0D08] text-white px-6 sm:px-8 py-3 border-b border-black/20 animate-enter transition-all">
+        <div class="flex items-center justify-between text-xs mb-1.5">
+          <div class="flex items-center gap-2 font-bold">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#D4EE0E] animate-ping"></span>
+            <span id="pb-title" class="text-[#D4EE0E] font-black uppercase tracking-wide">Đang xử lý dữ liệu...</span>
+            <span id="pb-detail" class="text-white/70 text-[11px] truncate max-w-sm sm:max-w-md"></span>
+          </div>
+          <span id="pb-percent" class="font-black font-mono text-[#D4EE0E] bg-white/10 px-2 py-0.5 rounded text-xs">0%</span>
+        </div>
+        <div class="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+          <div id="pb-fill" class="bg-[#D4EE0E] h-full rounded-full transition-all duration-200" style="width: 0%"></div>
+        </div>
+        <div class="flex items-center justify-between text-[10px] text-white/60 mt-1">
+          <span id="pb-sub-left">Hệ thống xử lý theo từng lô (Batch/Chunk Processing)</span>
+          <span id="pb-sub-right">Vui lòng chờ trong giây lát...</span>
+        </div>
+      </div>
+
+      <!-- STEP CONTENT CONTAINER -->
+      <div id="step-content-container" class="p-5 sm:p-7 flex-1 overflow-y-auto max-h-[calc(100vh-140px)] min-h-[580px] space-y-5">
+
+        <!-- ================= STEP 1: INGEST & MAPPING ================= -->
+        <div id="step-panel-1" class="space-y-4">
+
+          <!-- KHUNG THÔNG TIN DOANH NGHIỆP & MỤC TIÊU PHÂN TÍCH -->
+          <div class="bg-white border border-black/15 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3.5">
+            <div class="flex items-center justify-between border-b border-black/10 pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-md bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black">🏢</span>
+                <strong class="text-xs sm:text-sm font-black text-[#0C0E08] uppercase tracking-wide">Thông tin doanh nghiệp &amp; Mục tiêu phân tích</strong>
+              </div>
+              <span class="text-[10px] font-extrabold bg-[#D4EE0E] text-[#0C0E08] px-2 py-0.5 rounded">Bước 1: Thiết lập</span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <!-- 2 DÒNG BẮT BUỘC -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- DÒNG 1 (BẮT BUỘC): TÊN DOANH NGHIỆP -->
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label for="biz-name" class="text-[11px] font-extrabold text-[#0C0E08]">
+                      1. Tên doanh nghiệp <span class="text-rose-600 font-black">*</span>
+                    </label>
+                    <span class="text-[10px] font-extrabold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">Bắt buộc</span>
+                  </div>
+                  <input type="text" id="biz-name" placeholder="Ví dụ: Tên Doanh Nghiệp / Tổ chức" class="w-full bg-[#F7F7F4] border border-black/20 focus:border-[#0C0E08] focus:bg-white rounded-lg px-3 py-2 text-xs font-bold text-[#0C0E08] focus:outline-none transition" required>
+                </div>
+
+                <!-- DÒNG 2 (BẮT BUỘC): LOẠI HÌNH DOANH NGHIỆP -->
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label for="biz-type" class="text-[11px] font-extrabold text-[#0C0E08]">
+                      2. Loại hình doanh nghiệp <span class="text-rose-600 font-black">*</span>
+                    </label>
+                    <span class="text-[10px] font-extrabold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">Bắt buộc</span>
+                  </div>
+                  <input type="text" id="biz-type" list="biz-type-list" placeholder="Ví dụ: Thương mại &amp; Phân phối B2B, Bán lẻ / E-commerce..." class="w-full bg-[#F7F7F4] border border-black/20 focus:border-[#0C0E08] focus:bg-white rounded-lg px-3 py-2 text-xs font-bold text-[#0C0E08] focus:outline-none transition" required>
+                  <datalist id="biz-type-list">
+                    <option value="Thương mại &amp; Phân phối B2B">
+                    <option value="Bán buôn thiết bị &amp; Vật tư công nghiệp">
+                    <option value="Bán lẻ / Chuỗi phân phối / E-commerce">
+                    <option value="Sản xuất &amp; Gia công sản phẩm">
+                    <option value="Dịch vụ &amp; Đấu thầu dự án B2B">
+                    <option value="F&amp;B / Xuất nhập khẩu &amp; Tiêu dùng">
+                  </datalist>
+                </div>
+              </div>
+
+              <!-- 2 DÒNG KHÔNG BẮT BUỘC -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- DÒNG 3 (KHÔNG BẮT BUỘC): THÔNG TIN BỔ SUNG -->
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label for="biz-extra" class="text-[11px] font-bold text-[#0C0E08]/80">
+                      3. Thông tin bổ sung
+                    </label>
+                    <span class="text-[10px] text-[#0C0E08]/50 bg-black/5 px-1.5 py-0.5 rounded">Không bắt buộc</span>
+                  </div>
+                  <input type="text" id="biz-extra" placeholder="Ví dụ: Quy mô 6 NVKD, phân phối 3 miền, 3 kênh chính..." class="w-full bg-[#F7F7F4] border border-black/20 focus:border-[#0C0E08] focus:bg-white rounded-lg px-3 py-2 text-xs text-[#0C0E08] focus:outline-none transition">
+                </div>
+
+                <!-- DÒNG 4 (KHÔNG BẮT BUỘC): VẤN ĐỀ CẦN PHÂN TÍCH -->
+                <div>
+                  <div class="flex items-center justify-between mb-1">
+                    <label for="biz-problem" class="text-[11px] font-bold text-[#0C0E08]/80">
+                      4. Vấn đề cần phân tích
+                    </label>
+                    <span class="text-[10px] text-[#0C0E08]/50 bg-black/5 px-1.5 py-0.5 rounded">Không bắt buộc</span>
+                  </div>
+                  <input type="text" id="biz-problem" placeholder="Ví dụ: Tối ưu chiết khấu VIP, giảm hoàn hàng, tăng biên margin..." class="w-full bg-[#F7F7F4] border border-black/20 focus:border-[#0C0E08] focus:bg-white rounded-lg px-3 py-2 text-xs text-[#0C0E08] focus:outline-none transition">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- INTERACTIVE GUIDANCE & BREAKPOINT: BƯỚC 1 -->
+          <div class="bg-amber-50/90 border border-amber-300 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5 text-xs shadow-xs">
+            <div class="flex items-center gap-2 flex-1 min-w-[260px]">
+              <span class="w-6 h-6 rounded-md bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black shrink-0">💬</span>
+              <input type="text" id="guidance-step-1" placeholder="Ghi chú / Chỉ thị điều chỉnh cấu trúc &amp; ánh xạ Bước 1 (tùy chọn)..." class="w-full bg-white border border-black/15 focus:border-black rounded-lg px-3 py-1.5 text-xs text-[#0C0E08] focus:outline-none transition">
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="rerunCurrentStep()" class="text-xs font-bold bg-white hover:bg-black/5 text-[#0C0E08] border border-black/20 px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+                <span>↺ Chạy lại Bước 1</span>
+              </button>
+              <button onclick="gateApprove()" id="btn-step1-next" class="text-xs font-black bg-[#D4EE0E] hover:brightness-95 text-[#0C0E08] border border-black/15 px-3.5 py-1.5 rounded-lg flex items-center gap-1 shadow-xs transition">
+                <span id="btn-step1-next-text">✓ Duyệt Bước 1 &amp; Sang Bước 2 →</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Drag & Drop Upload Box -->
+          <div id="dropzone" onclick="document.getElementById('file-input').click()" class="border-2 border-dashed border-black/25 bg-white hover:border-[#0C0E08] rounded-xl p-5 text-center cursor-pointer transition">
+            <input type="file" id="file-input" multiple accept=".xlsx,.xlsm,.xls,.csv,.tsv,.json,.docx,.txt,.md,.pdf" class="hidden" onchange="handleFilesSelected(event)">
+            <p class="text-sm font-extrabold text-[#0C0E08]">📁 Tải file dữ liệu (.xlsx, .csv)</p>
+            <p class="text-xs text-[#0C0E08]/60 mt-0.5">Kéo thả hoặc bấm để tải file</p>
+          </div>
+
+          <div id="s1-mapping-area" class="hidden space-y-4">
+            <!-- Mode Banner & Switcher -->
+            <div class="bg-[#EFECE6] border border-black/15 rounded-xl px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider bg-[#0B0D08] text-[#D4EE0E] px-2 py-0.5 rounded">Chế độ</span>
+                <strong id="s1-mode-badge" class="text-[#0C0E08]">📊 Báo cáo Doanh thu &amp; Hiệu suất Đa định dạng</strong>
+              </div>
+              <select id="s1-mode-select" onchange="onModeChanged()" class="bg-white border border-black/15 rounded-lg px-2.5 py-1.5 font-bold text-xs">
+                <option value="UNIVERSAL_ANALYTICS" selected>📊 Thống kê &amp; Tài chính</option>
+                <option value="MINH_AN_B2B">🏢 Thẩm định B2B</option>
+              </select>
+            </div>
+
+            <!-- Sheet Role Assignment (MINH AN B2B) -->
+            <div id="s1-b2b-roles" class="hidden border-t border-b border-black/15 py-3 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-[#0C0E08]/60 mb-1">Yêu cầu KH *</label>
+                <select id="role-inquiries" onchange="onRoleChanged('inquiries')" class="w-full bg-white border border-black/15 rounded-lg px-2.5 py-2 font-bold"></select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-[#0C0E08]/60 mb-1">Bảng giá *</label>
+                <select id="role-catalog" onchange="onRoleChanged('catalog')" class="w-full bg-white border border-black/15 rounded-lg px-2.5 py-2 font-bold"></select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold uppercase text-[#0C0E08]/60 mb-1">Tồn kho *</label>
+                <select id="role-inventory" onchange="onRoleChanged('inventory')" class="w-full bg-white border border-black/15 rounded-lg px-2.5 py-2 font-bold"></select>
+              </div>
+            </div>
+
+            <!-- Sheet Selector (UNIVERSAL ANALYTICS) -->
+            <div id="s1-univ-sheet-bar" class="border-t border-b border-black/15 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div class="flex-1 min-w-[220px]">
+                <label class="block text-[10px] font-bold uppercase text-[#0C0E08]/60 mb-1">Chọn bảng dữ liệu</label>
+                <select id="s1-univ-sheet-select" onchange="onUnivSheetChanged()" class="w-full bg-white border border-black/15 rounded-lg px-2.5 py-2 font-bold"></select>
+              </div>
+            </div>
+
+            <!-- AI Auto-Mapping Dropdowns (B2B) -->
+            <div id="s1-b2b-mapping-wrap" class="hidden bg-white border border-black/15 rounded-xl p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <strong class="text-xs font-extrabold">🔗 Ánh xạ cột</strong>
+                <span class="text-[11px] bg-[#D4EE0E] px-2 py-0.5 rounded font-bold">Chỉnh tay</span>
+              </div>
+              <div id="s1-mapping-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs"></div>
+            </div>
+
+            <!-- AI Semantic Schema Mapping (UNIVERSAL ANALYTICS) -->
+            <div id="s1-univ-mapping-wrap" class="bg-white border border-black/15 rounded-xl p-4 space-y-3">
+              <div id="s1-ai-insight" class="bg-[#D4EE0E]/30 border border-black/10 rounded-lg px-3 py-2 text-[11px]"></div>
+              <div class="flex items-center justify-between">
+                <strong class="text-xs font-extrabold">🧠 Ánh xạ cột</strong>
+                <span class="text-[11px] bg-[#D4EE0E] px-2 py-0.5 rounded font-bold">Tự động</span>
+              </div>
+              <div id="s1-univ-mapping-grid" class="grid grid-cols-1 sm:grid-cols-5 gap-2.5 text-xs"></div>
+              <div id="s1-univ-groups-wrap" class="pt-2 border-t border-black/10">
+                <span class="block text-[10px] font-bold uppercase text-[#0C0E08]/60 mb-1.5">Phân nhóm:</span>
+                <div id="s1-univ-groups-checks" class="flex flex-wrap gap-2 text-xs"></div>
+              </div>
+            </div>
+
+            <!-- Raw Preview Table with Pagination -->
+            <div class="bg-white border border-black/15 rounded-xl overflow-hidden shadow-xs">
+              <div class="px-4 py-2.5 bg-[#EFECE6] text-xs font-bold flex flex-wrap justify-between items-center gap-2 border-b border-black/10">
+                <div class="flex items-center gap-2">
+                  <span>📋 Dữ liệu thô</span>
+                  <span id="s1-preview-count" class="text-[11px] font-extrabold bg-[#D4EE0E] text-[#0C0E08] px-2 py-0.5 rounded">0 dòng</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <span class="text-[10px] text-[#0C0E08]/60 font-semibold">Hiển thị:</span>
+                  <select id="s1-page-size" onchange="onS1PageSizeChanged(this.value)" class="bg-white border border-black/15 rounded px-2 py-0.5 text-[11px] font-bold focus:outline-none">
+                    <option value="50" selected>50 dòng/trang</option>
+                    <option value="100">100 dòng/trang</option>
+                  </select>
+                </div>
+              </div>
+              <div class="overflow-x-auto max-h-64">
+                <table class="w-full text-[11px] text-left" id="s1-preview-table"></table>
+              </div>
+              <!-- Pagination Footer -->
+              <div id="s1-pagination-bar" class="px-4 py-2 bg-[#F7F7F4] border-t border-black/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-1.5">
+                  <button id="s1-btn-prev" onclick="changeS1Page(-1)" class="px-2.5 py-1 bg-white border border-black/20 hover:bg-black/5 rounded font-bold disabled:opacity-40 disabled:cursor-not-allowed">◀ Trang trước</button>
+                  <button id="s1-btn-next" onclick="changeS1Page(1)" class="px-2.5 py-1 bg-white border border-black/20 hover:bg-black/5 rounded font-bold disabled:opacity-40 disabled:cursor-not-allowed">Trang sau ▶</button>
+                </div>
+                <div class="flex items-center gap-2 text-[11px] font-semibold text-[#0C0E08]/80">
+                  <span id="s1-page-info">Trang 1 / 1</span>
+                  <span class="text-black/30">|</span>
+                  <span id="s1-rows-range" class="font-mono">Dòng 0 - 0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= STEP 2: SKILL 1 CLEANING ================= -->
+        <div id="step-panel-2" class="hidden space-y-4">
+          <!-- INTERACTIVE GUIDANCE & BREAKPOINT: BƯỚC 2 -->
+          <div class="bg-amber-50/90 border border-amber-300 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5 text-xs shadow-xs">
+            <div class="flex items-center gap-2 flex-1 min-w-[260px]">
+              <span class="w-6 h-6 rounded-md bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black shrink-0">💬</span>
+              <input type="text" id="guidance-step-2" placeholder="Ghi chú / Chỉ thị làm sạch bổ sung Bước 2 (ví dụ: loại bỏ dòng âm, chuẩn hóa theo quy tắc...)..." class="w-full bg-white border border-black/15 focus:border-black rounded-lg px-3 py-1.5 text-xs text-[#0C0E08] focus:outline-none transition">
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="rerunCurrentStep()" class="text-xs font-bold bg-white hover:bg-black/5 text-[#0C0E08] border border-black/20 px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+                <span>↺ Chạy lại Bước 2</span>
+              </button>
+              <button onclick="gateApprove()" class="text-xs font-black bg-[#D4EE0E] hover:brightness-95 text-[#0C0E08] border border-black/15 px-3.5 py-1.5 rounded-lg flex items-center gap-1 shadow-xs transition">
+                <span>✓ Duyệt Bước 2 &amp; Sang Bước 3 →</span>
+              </button>
+            </div>
+          </div>
+          <div id="s2-comparison-list" class="space-y-3"></div>
+          <div id="s2-univ-wrap" class="hidden space-y-3">
+            <div id="s2-univ-summary" class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-xs"></div>
+            <div id="s2-univ-stats" class="bg-white border border-black/15 rounded-xl overflow-hidden"></div>
+            <!-- Cleaned Table with Pagination -->
+            <div class="bg-white border border-black/15 rounded-xl overflow-hidden shadow-xs">
+              <div class="px-4 py-2.5 bg-[#EFECE6] text-xs font-bold flex flex-wrap justify-between items-center gap-2 border-b border-black/10">
+                <div class="flex items-center gap-2">
+                  <span>✨ Dữ liệu sau làm sạch</span>
+                  <span id="s2-univ-count" class="text-[11px] font-extrabold bg-[#D4EE0E] text-[#0C0E08] px-2 py-0.5 rounded">0 dòng</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <span class="text-[10px] text-[#0C0E08]/60 font-semibold">Hiển thị:</span>
+                  <select id="s2-page-size" onchange="onS2PageSizeChanged(this.value)" class="bg-white border border-black/15 rounded px-2 py-0.5 text-[11px] font-bold focus:outline-none">
+                    <option value="50" selected>50 dòng/trang</option>
+                    <option value="100">100 dòng/trang</option>
+                  </select>
+                </div>
+              </div>
+              <div class="overflow-x-auto max-h-72">
+                <table class="w-full text-[11px] text-left" id="s2-univ-table"></table>
+              </div>
+              <!-- Pagination Footer -->
+              <div id="s2-pagination-bar" class="px-4 py-2 bg-[#F7F7F4] border-t border-black/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-1.5">
+                  <button id="s2-btn-prev" onclick="changeS2Page(-1)" class="px-2.5 py-1 bg-white border border-black/20 hover:bg-black/5 rounded font-bold disabled:opacity-40 disabled:cursor-not-allowed">◀ Trang trước</button>
+                  <button id="s2-btn-next" onclick="changeS2Page(1)" class="px-2.5 py-1 bg-white border border-black/20 hover:bg-black/5 rounded font-bold disabled:opacity-40 disabled:cursor-not-allowed">Trang sau ▶</button>
+                </div>
+                <div class="flex items-center gap-2 text-[11px] font-semibold text-[#0C0E08]/80">
+                  <span id="s2-page-info">Trang 1 / 1</span>
+                  <span class="text-black/30">|</span>
+                  <span id="s2-rows-range" class="font-mono">Dòng 0 - 0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= STEP 3: SKILL 2 CALCULATION ================= -->
+        <div id="step-panel-3" class="hidden space-y-4">
+          <!-- INTERACTIVE GUIDANCE & BREAKPOINT: BƯỚC 3 -->
+          <div class="bg-amber-50/90 border border-amber-300 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5 text-xs shadow-xs">
+            <div class="flex items-center gap-2 flex-1 min-w-[260px]">
+              <span class="w-6 h-6 rounded-md bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black shrink-0">💬</span>
+              <input type="text" id="guidance-step-3" placeholder="Ghi chú / Chỉ thị tính toán tài chính &amp; phân tích Bước 3 (tùy chọn)..." class="w-full bg-white border border-black/15 focus:border-black rounded-lg px-3 py-1.5 text-xs text-[#0C0E08] focus:outline-none transition">
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="rerunCurrentStep()" class="text-xs font-bold bg-white hover:bg-black/5 text-[#0C0E08] border border-black/20 px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+                <span>↺ Chạy lại Bước 3</span>
+              </button>
+              <button onclick="gateApprove()" class="text-xs font-black bg-[#D4EE0E] hover:brightness-95 text-[#0C0E08] border border-black/15 px-3.5 py-1.5 rounded-lg flex items-center gap-1 shadow-xs transition">
+                <span>✓ Duyệt Bước 3 &amp; Sang Bước 4 →</span>
+              </button>
+            </div>
+          </div>
+          <div id="s3-b2b-wrap" class="space-y-4">
+            <!-- Configurable Rules -->
+            <div class="bg-white border border-black/15 rounded-xl p-3.5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div>
+                <label class="block text-[10px] font-bold text-[#0C0E08]/60 mb-1">CK NVKD (%)</label>
+                <input id="rule-nvkd-disc" type="number" step="0.5" value="5.0" class="w-full bg-[#F7F7F4] border border-black/15 rounded-lg px-2.5 py-1.5 font-mono font-bold">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-[#0C0E08]/60 mb-1">CK TPKD (%)</label>
+                <input id="rule-tpkd-disc" type="number" step="0.5" value="12.0" class="w-full bg-[#F7F7F4] border border-black/15 rounded-lg px-2.5 py-1.5 font-mono font-bold">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-[#0C0E08]/60 mb-1">Hạn mức NVKD (đ)</label>
+                <input id="rule-nvkd-val" type="number" step="10000000" value="200000000" class="w-full bg-[#F7F7F4] border border-black/15 rounded-lg px-2.5 py-1.5 font-mono font-bold">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-[#0C0E08]/60 mb-1">Thuế VAT (%)</label>
+                <input id="rule-vat" type="number" step="1" value="10" class="w-full bg-[#F7F7F4] border border-black/15 rounded-lg px-2.5 py-1.5 font-mono font-bold">
+              </div>
+            </div>
+
+            <div class="bg-white border border-black/15 rounded-xl overflow-hidden">
+              <div class="px-4 py-2 bg-[#EFECE6] text-[11px] font-bold flex justify-between items-center border-b border-black/10">
+                <span>Danh sách cơ hội</span>
+                <button id="btn-toggle-s3-b2b" onclick="toggleS3B2bTable()" class="text-[10px] font-bold bg-white border border-black/15 px-2 py-0.5 rounded hover:bg-black/5">Xem tất cả</button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-[11px] text-left">
+                  <thead class="bg-[#F7F7F4] font-bold border-b border-black/10">
+                    <tr>
+                      <th class="py-2.5 px-3">Mã YC / Cơ hội</th>
+                      <th class="py-2.5 px-3">Khách hàng &amp; NVKD</th>
+                      <th class="py-2.5 px-3">Phân loại (4 Nhóm)</th>
+                      <th class="py-2.5 px-3 text-right">Sau VAT</th>
+                      <th class="py-2.5 px-3 text-center">CK / Margin</th>
+                      <th class="py-2.5 px-3">Căn cứ đối chiếu</th>
+                    </tr>
+                  </thead>
+                  <tbody id="s3-results-tbody" class="divide-y divide-black/10"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div id="s3-univ-wrap" class="hidden space-y-4">
+            <div id="s3-univ-kpis" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs"></div>
+
+            <!-- View Tabs + Custom Rule Input -->
+            <div class="bg-white border border-black/15 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex flex-wrap gap-1.5">
+                <button onclick="switchUnivView('tree')" id="s3-tab-tree" class="px-3 py-1.5 rounded-lg font-bold bg-[#0B0D08] text-[#D4EE0E]">🌳 Cây KPI &amp; Margin</button>
+                <button onclick="switchUnivView('vip')" id="s3-tab-vip" class="px-3 py-1.5 rounded-lg font-bold bg-[#EFECE6] text-[#0C0E08]">⭐ Khách hàng VIP</button>
+                <button onclick="switchUnivView('groups')" id="s3-tab-groups" class="px-3 py-1.5 rounded-lg font-bold bg-[#EFECE6] text-[#0C0E08]">📊 Phân nhóm</button>
+              </div>
+              <input id="s3-univ-custom-rule" type="text" placeholder="Lọc dữ liệu (vd: margin >= 15)" class="bg-[#F7F7F4] border border-black/15 rounded-lg px-2.5 py-1.5 text-[11px] min-w-[200px]">
+            </div>
+
+            <!-- PANE 1: KPI & MARGIN TREE -->
+            <div id="s3-univ-pane-tree" class="space-y-3"></div>
+
+            <!-- PANE 2: PRIORITY CUSTOMERS (PARETO ABC) -->
+            <div id="s3-univ-pane-vip" class="hidden space-y-3"></div>
+
+            <!-- PANE 3: DYNAMIC GROUP-BY BREAKDOWN -->
+            <div id="s3-univ-pane-groups" class="hidden space-y-3">
+              <div class="bg-white border border-black/15 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span class="font-extrabold">Phân nhóm:</span>
+                <div id="s3-univ-dim-tabs" class="flex flex-wrap gap-1.5"></div>
+              </div>
+              <div class="bg-white border border-black/15 rounded-xl overflow-hidden">
+                <div class="px-4 py-2 bg-[#EFECE6] text-[11px] font-bold flex justify-between items-center border-b border-black/10">
+                  <span>Chi tiết phân nhóm</span>
+                  <button id="btn-toggle-s3-univ-dim" onclick="toggleS3UnivDimTable()" class="text-[10px] font-bold bg-white border border-black/15 px-2 py-0.5 rounded hover:bg-black/5">Xem tất cả</button>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-[11px] text-left">
+                    <thead class="bg-[#F7F7F4] font-bold border-b border-black/10">
+                      <tr>
+                        <th class="py-2.5 px-3">Nhóm</th>
+                        <th class="py-2.5 px-3 text-right">Số dòng</th>
+                        <th class="py-2.5 px-3 text-right">Doanh thu</th>
+                        <th class="py-2.5 px-3 text-right">Tỷ trọng</th>
+                        <th class="py-2.5 px-3 text-right">Lợi nhuận</th>
+                        <th class="py-2.5 px-3 text-right">Margin (%)</th>
+                        <th class="py-2.5 px-3">Đánh giá Hiệu suất</th>
+                      </tr>
+                    </thead>
+                    <tbody id="s3-univ-tbody" class="divide-y divide-black/10"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= STEP 4: PRESENTATION & DOCS ================= -->
+        <div id="step-panel-4" class="hidden space-y-4">
+          <!-- INTERACTIVE GUIDANCE & BREAKPOINT: BƯỚC 4 -->
+          <div class="bg-amber-50/90 border border-amber-300 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2.5 text-xs shadow-xs">
+            <div class="flex items-center gap-2 flex-1 min-w-[260px]">
+              <span class="w-6 h-6 rounded-md bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black shrink-0">💬</span>
+              <input type="text" id="guidance-step-4" placeholder="Ghi chú / Chỉ thị điều chỉnh nhận định &amp; báo cáo Bước 4 (tùy chọn)..." class="w-full bg-white border border-black/15 focus:border-black rounded-lg px-3 py-1.5 text-xs text-[#0C0E08] focus:outline-none transition">
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="rerunCurrentStep()" class="text-xs font-bold bg-white hover:bg-black/5 text-[#0C0E08] border border-black/20 px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+                <span>↺ Chạy lại Bước 4</span>
+              </button>
+              <button onclick="gateApprove()" class="text-xs font-black bg-[#D4EE0E] hover:brightness-95 text-[#0C0E08] border border-black/15 px-3.5 py-1.5 rounded-lg flex items-center gap-1 shadow-xs transition">
+                <span>✓ Duyệt Bước 4 &amp; Sang Bước 5 →</span>
+              </button>
+            </div>
+          </div>
+          <div id="s4-b2b-wrap" class="space-y-4">
+            <!-- Givingly Signature 2-Column Thin-Border Dashboard Summary -->
+            <div class="border-t border-b border-black/15 bg-white rounded-xl grid grid-cols-1 sm:grid-cols-2 text-xs">
+              <div class="p-4 sm:border-r border-black/15 grid grid-cols-2 gap-2">
+                <div class="bg-[#D4EE0E]/50 p-2.5 rounded-lg">
+                  <span class="text-[10px] font-bold block">Có thể tiếp tục</span>
+                  <strong id="s4-cnt-continue" class="text-lg font-black">0</strong>
+                </div>
+                <div class="bg-[#EFECE6] p-2.5 rounded-lg">
+                  <span class="text-[10px] font-bold block">Chờ duyệt</span>
+                  <strong id="s4-cnt-approve" class="text-lg font-black">0</strong>
+                </div>
+                <div class="bg-[#EFECE6] p-2.5 rounded-lg">
+                  <span class="text-[10px] font-bold block">Cần bổ sung TT</span>
+                  <strong id="s4-cnt-missing" class="text-lg font-black">0</strong>
+                </div>
+                <div class="bg-[#EFECE6] p-2.5 rounded-lg">
+                  <span class="text-[10px] font-bold block">Chưa đáp ứng</span>
+                  <strong id="s4-cnt-unmet" class="text-lg font-black">0</strong>
+                </div>
+              </div>
+              <div class="p-4 flex flex-col justify-between gap-2">
+                <div class="flex items-center justify-between gap-2">
+                  <div>
+                    <span class="text-[11px] text-[#0C0E08]/60 block">Tổng cơ hội:</span>
+                    <strong id="s4-total-count" class="text-lg font-black">0</strong>
+                  </div>
+                  <div class="bg-[#D4EE0E] px-3 py-1.5 rounded-md text-right">
+                    <span class="text-[10px] text-[#0C0E08]/80 block leading-none">Doanh số khả thi</span>
+                    <strong id="s4-eligible-val" class="text-sm font-black font-mono">0 đ</strong>
+                  </div>
+                </div>
+                <div class="w-full bg-black/10 h-1.5 rounded-full overflow-hidden">
+                  <div id="s4-progress-bar" class="bg-[#D4EE0E] h-full rounded-full transition-all" style="width: 60%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Document Viewer & Email Tone Rewriter -->
+            <div class="bg-white border border-black/15 rounded-xl p-4 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <select id="s4-opp-select" onchange="renderSelectedOppDocs()" class="text-xs font-bold bg-[#F7F7F4] border border-black/15 rounded-lg px-3 py-2 flex-1 min-w-[200px]"></select>
+                <div class="flex gap-1 bg-[#EFECE6] p-1 rounded-lg text-[11px] font-bold">
+                  <button onclick="switchDocTab('dossier')" id="doctab-dossier" class="px-2.5 py-1 rounded bg-[#0B0D08] text-white">Hồ sơ Cơ hội</button>
+                  <button onclick="switchDocTab('email')" id="doctab-email" class="px-2.5 py-1 rounded text-[#0C0E08]">Email Nháp</button>
+                  <button onclick="switchDocTab('approval')" id="doctab-approval" class="px-2.5 py-1 rounded text-[#0C0E08]">Phiếu Duyệt</button>
+                </div>
+              </div>
+
+              <div id="doc-wrap-dossier">
+                <textarea id="doc-text-dossier" readonly rows="8" class="w-full text-xs font-mono bg-[#F7F7F4] border border-black/10 rounded-lg p-3"></textarea>
+              </div>
+              <div id="doc-wrap-email" class="hidden space-y-2">
+                <div class="flex flex-wrap gap-2 items-center">
+                  <select id="s4-tone-select" class="text-xs bg-[#F7F7F4] border border-black/15 rounded-lg px-2.5 py-1.5 font-semibold">
+                    <option value="Trang trọng & Chuẩn B2B">Trang trọng</option>
+                    <option value="Ngắn gọn súc tích">Ngắn gọn</option>
+                    <option value="Thuyết phục khéo léo">Thuyết phục</option>
+                  </select>
+                  <button onclick="rewriteSelectedEmail()" class="text-xs font-bold bg-[#D4EE0E] hover:brightness-95 text-[#0C0E08] px-3 py-1.5 rounded-lg">
+                    ✨ Viết lại
+                  </button>
+                </div>
+                <textarea id="doc-text-email" oninput="saveEditedEmail()" rows="8" class="w-full text-xs font-mono bg-[#F7F7F4] border border-black/15 rounded-lg p-3"></textarea>
+              </div>
+              <div id="doc-wrap-approval" class="hidden">
+                <textarea id="doc-text-approval" readonly rows="8" class="w-full text-xs font-mono bg-[#F7F7F4] border border-black/10 rounded-lg p-3"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div id="s4-univ-wrap" class="hidden space-y-4">
+            <!-- Givingly 2-Column Thin-Border Executive Summary -->
+            <div class="border-t border-b border-black/15 bg-white rounded-xl grid grid-cols-1 sm:grid-cols-2 text-xs">
+              <div class="p-4 sm:border-r border-black/15 grid grid-cols-2 gap-2.5" id="s4-univ-kpis-left"></div>
+              <div class="p-4 space-y-2" id="s4-univ-bars-right"></div>
+            </div>
+
+            <!-- AI Executive Narrative Card (Rule 3: Rendered HTML by default + Optional Raw Markdown Editor) -->
+            <div class="bg-white border border-black/15 rounded-xl p-4 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-black/10 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-[#1B365D] text-white flex items-center justify-center text-xs font-black">🤖</span>
+                  <strong class="text-xs font-black uppercase tracking-wider text-slate-800">Nhận định Điều hành AI (Step 4 Insights)</strong>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button type="button" onclick="toggleS4MarkdownEditor()" id="btn-toggle-s4-editor" class="text-xs font-bold bg-[#EFECE6] hover:bg-black/10 text-slate-800 px-2.5 py-1.5 rounded-lg border border-black/10 transition flex items-center gap-1">
+                    <span id="s4-toggle-icon">✏️</span>
+                    <span id="s4-toggle-text">Sửa Markdown</span>
+                  </button>
+                  <select id="s4-univ-style" class="text-xs bg-[#F7F7F4] border border-black/15 rounded-lg px-2.5 py-1.5 font-semibold text-slate-800">
+                    <option value="Điều hành súc tích">Điều hành súc tích</option>
+                    <option value="Chi tiết chuyên sâu">Chi tiết</option>
+                    <option value="Đề xuất hành động">Đề xuất hành động</option>
+                  </select>
+                  <button onclick="regenerateUnivReport()" id="btn-univ-regen" class="text-xs font-bold bg-[#D4EE0E] hover:brightness-95 text-[#0C0E08] px-3 py-1.5 rounded-lg shadow-xs transition">
+                    ✨ Viết lại
+                  </button>
+                </div>
+              </div>
+
+              <!-- Rendered View (Default: Markdown-to-HTML) -->
+              <div id="s4-univ-report-rendered" class="bg-[#F8FAFC] border border-slate-200 rounded-xl p-4 space-y-2 text-xs leading-relaxed text-slate-800 shadow-2xs"></div>
+
+              <!-- Editable Textarea (Hidden by default, shown when clicking Sửa Markdown) -->
+              <div id="s4-univ-editor-wrap" class="hidden space-y-2">
+                <div class="text-[11px] font-bold text-slate-500 italic">Nhập văn bản theo định dạng Markdown (hệ thống sẽ tự động chuyển đổi sang giao diện trực quan):</div>
+                <textarea id="s4-univ-report-text" oninput="onS4ReportInput(this.value)" rows="9" class="w-full text-xs font-mono leading-relaxed bg-[#F7F7F4] border border-black/20 rounded-lg p-3 focus:outline-none focus:border-[#1B365D]"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= STEP 5: EXECUTIVE BUSINESS REPORT DIRECTLY ON WEB ================= -->
+        <div id="step-panel-5" class="hidden space-y-6">
+
+          <!-- TOP EXECUTIVE BANNER (Clean & Print-Ready) -->
+          <div class="bg-white border border-black/15 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-black uppercase tracking-wider bg-[#0B0D08] text-[#D4EE0E] px-2 py-0.5 rounded">Báo cáo điều hành</span>
+                <span class="text-[10px] font-bold text-[#0C0E08]/60" id="s5-report-source-name">Nguồn: Dữ liệu giao dịch kinh doanh</span>
+              </div>
+              <h2 id="s5-exec-heading" class="text-xl sm:text-2xl font-black text-[#0C0E08] mt-1">Báo cáo Phân tích Doanh thu &amp; Hiệu suất</h2>
+              <p id="s5-exec-subheading" class="text-xs text-[#0C0E08]/70 mt-0.5">Xác thực tự động bởi Sales AI Agent &amp; Pandas Engine</p>
+            </div>
+            <div class="flex items-center flex-wrap gap-2.5 no-print">
+              <button onclick="downloadWordReport()" class="text-xs font-bold bg-[#1B365D] hover:bg-[#152a48] text-white px-3.5 py-2 rounded-lg flex items-center gap-1.5 transition shadow-xs">
+                <span>📄 Xuất file Word (.docx)</span>
+              </button>
+              <button onclick="downloadExcelReport()" class="text-xs font-bold bg-emerald-800 hover:bg-emerald-900 text-white px-3.5 py-2 rounded-lg flex items-center gap-1.5 transition shadow-xs">
+                <span>📊 Xuất file Excel (.xlsx)</span>
+              </button>
+              <button onclick="window.print()" class="text-xs font-bold bg-[#EFECE6] hover:bg-black/10 text-[#0C0E08] px-3.5 py-2 rounded-lg flex items-center gap-1.5 transition border border-black/10 shadow-xs">
+                <span>🖨️ In</span>
+              </button>
+              <span class="text-xs font-extrabold bg-[#D4EE0E] text-[#0C0E08] px-3 py-2 rounded-lg border border-black/15 shadow-xs">
+                ✓ Đã xác thực
+              </span>
+            </div>
+          </div>
+
+          <!-- ================= PHẦN 1: TÓM TẮT ĐIỀU HÀNH (EXECUTIVE SUMMARY) ================= -->
+          <div class="space-y-3 bg-white border border-black/15 rounded-2xl p-4 sm:p-5 shadow-xs page-break-avoid">
+            <div class="flex items-center justify-between border-b border-black/10 pb-2.5">
+              <h3 class="text-xs font-black uppercase tracking-wider text-[#0C0E08] flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black">1</span>
+                <span>PHẦN 1: TÓM TẮT ĐIỀU HÀNH (EXECUTIVE SUMMARY)</span>
+              </h3>
+              <span class="text-[10px] text-[#0C0E08]/70 font-bold bg-[#EFECE6] px-2 py-0.5 rounded no-print">Quy mô &amp; Độ phủ dữ liệu</span>
+            </div>
+
+            <!-- Narrative Box -->
+            <div id="s5-p1-narrative" class="text-xs leading-relaxed text-[#0C0E08]/85 font-medium bg-[#F7F7F4] p-3.5 rounded-xl border border-black/10 space-y-2"></div>
+
+            <!-- Bảng Chỉ số định lượng trọng tâm -->
+            <div class="space-y-1.5 pt-1">
+              <div class="text-[11px] font-extrabold text-[#0C0E08]/80 uppercase tracking-wider">Bảng tổng hợp chỉ số định lượng có trong bộ dữ liệu:</div>
+              <div class="overflow-x-auto border border-black/10 rounded-xl">
+                <table class="w-full text-xs text-left" id="s5-p1-metrics-table">
+                  <thead class="bg-[#1B365D] text-white font-bold text-[11px]">
+                    <tr>
+                      <th class="py-2.5 px-3">Chỉ số định lượng</th>
+                      <th class="py-2.5 px-3">Vai trò nhận diện</th>
+                      <th class="py-2.5 px-3 text-right">Tổng giá trị</th>
+                      <th class="py-2.5 px-3">Độ phủ dữ liệu thực tế</th>
+                    </tr>
+                  </thead>
+                  <tbody id="s5-p1-metrics-tbody" class="divide-y divide-black/10 text-[11px]"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= PHẦN 2: DASHBOARD KPI (SO SÁNH KỲ GẦN NHẤT VỚI KỲ LIỀN TRƯỚC) ================= -->
+          <div class="space-y-4 bg-white border border-black/15 rounded-2xl p-4 sm:p-5 shadow-xs page-break-avoid">
+            <div class="flex items-center justify-between border-b border-black/10 pb-2.5">
+              <h3 class="text-xs font-black uppercase tracking-wider text-[#0C0E08] flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black">2</span>
+                <span>PHẦN 2: DASHBOARD KPI (SO SÁNH KỲ GẦN NHẤT VỚI KỲ LIỀN TRƯỚC)</span>
+              </h3>
+              <span class="text-[10px] text-[#0C0E08]/60 font-semibold no-print">Tự động điền "—" nếu thiếu chỉ số</span>
+            </div>
+
+            <!-- Bảng So sánh KPI Kỳ gần nhất vs Kỳ liền trước -->
+            <div class="overflow-x-auto border border-black/10 rounded-xl">
+              <table class="w-full text-xs text-left" id="s5-p2-kpi-table">
+                <thead class="bg-[#1B365D] text-white font-bold text-[11px]">
+                  <tr>
+                    <th class="py-2.5 px-3">Chỉ số kinh doanh cốt lõi</th>
+                    <th class="py-2.5 px-3 text-right" id="s5-p2-th-cur">Giá trị (Kỳ gần nhất)</th>
+                    <th class="py-2.5 px-3 text-right" id="s5-p2-th-pri">Kỳ trước</th>
+                    <th class="py-2.5 px-3 text-center">Thay đổi %</th>
+                  </tr>
+                </thead>
+                <tbody id="s5-p2-kpi-tbody" class="divide-y divide-black/10 text-[11px]"></tbody>
+              </table>
+            </div>
+
+            <!-- Cụm Thẻ KPI Tổng quan (KPI Summary Cards chuẩn Senior BI) -->
+            <div class="space-y-2 pt-1">
+              <div class="text-[11px] font-extrabold text-[#0C0E08]/80 uppercase tracking-wider">Thẻ KPI trực quan:</div>
+              <div id="s5-kpi-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 text-xs"></div>
+            </div>
+
+            <!-- Lưới 2x2 Biểu đồ tương tác chuẩn BI (Chart.js) -->
+            <div class="space-y-2 pt-2">
+              <div class="text-[11px] font-extrabold text-[#0C0E08]/80 uppercase tracking-wider">Trực quan hóa xu hướng &amp; phân bổ:</div>
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Biểu đồ 1: Phân bổ Trạng thái Rủi ro / Tỷ trọng Đa chiều (Doughnut Chart) -->
+                <div class="bg-white border border-black/15 rounded-xl p-4 space-y-2 shadow-xs page-break-avoid">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-xs font-extrabold text-[#0C0E08]" id="donut-chart-title">🍩 Phân bổ Trạng thái Rủi ro Tồn kho</strong>
+                    <div class="flex items-center gap-1 text-[10px] font-bold no-print" id="donut-chips-container">
+                      <button id="btn-donut-risk" onclick="switchDonutDimension('Risk')" class="px-2 py-0.5 rounded bg-[#0B0D08] text-[#D4EE0E]">Trạng thái rủi ro</button>
+                      <button id="btn-donut-cat" onclick="switchDonutDimension('Category')" class="px-2 py-0.5 rounded bg-[#EFECE6] text-[#0C0E08]">Ngành hàng</button>
+                      <button id="btn-donut-reg" onclick="switchDonutDimension('Region')" class="px-2 py-0.5 rounded bg-[#EFECE6] text-[#0C0E08]">Khu vực</button>
+                    </div>
+                  </div>
+                  <div class="relative w-full h-[220px] flex items-center justify-center">
+                    <canvas id="chart-donut"></canvas>
+                  </div>
+                </div>
+
+                <!-- Biểu đồ 2: So sánh Phân loại / Tốc độ bán (Bar Chart) -->
+                <div class="bg-white border border-black/15 rounded-xl p-4 space-y-2 shadow-xs page-break-avoid">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-xs font-extrabold text-[#0C0E08]" id="top-products-chart-title">📊 Tốc độ bán &amp; Số ngày tồn kho (DOI) theo SKU</strong>
+                    <span class="text-[10px] font-bold bg-[#D4EE0E] text-[#0C0E08] px-2 py-0.5 rounded" id="top-products-chart-badge">Đối chiếu rủi ro</span>
+                  </div>
+                  <div class="relative w-full h-[220px]">
+                    <canvas id="chart-top-products"></canvas>
+                  </div>
+                </div>
+
+                <!-- Biểu đồ 3: Xu hướng theo Thời gian (Line Chart) -->
+                <div class="bg-white border border-black/15 rounded-xl p-4 space-y-2 shadow-xs page-break-avoid" id="chart-card-temporal">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-xs font-extrabold text-[#0C0E08]" id="trend-chart-title">📈 Xu hướng Doanh thu &amp; Tốc độ bán theo Thời gian</strong>
+                    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200" id="trend-chart-badge">Chuỗi thời gian</span>
+                  </div>
+                  <div class="relative w-full h-[220px]">
+                    <canvas id="chart-monthly-trend"></canvas>
+                  </div>
+                </div>
+
+                <!-- Biểu đồ 4: Phân tích Cột nhóm Đa chiều (Clustered Column) -->
+                <div class="bg-white border border-black/15 rounded-xl p-4 space-y-2 shadow-xs page-break-avoid">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-xs font-extrabold text-[#0C0E08]" id="segment-chart-title">📊 Doanh thu &amp; Biên Margin (%) theo Nhóm Danh mục</strong>
+                    <span class="text-[10px] font-bold bg-[#EFECE6] px-2 py-0.5 rounded text-[#0C0E08]/80" id="segment-chart-badge">Cột nhóm</span>
+                  </div>
+                  <div class="relative w-full h-[220px]">
+                    <canvas id="chart-segment-bar"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= PHẦN 3: PHÂN TÍCH CHUYÊN ĐỀ ================= -->
+          <div class="space-y-3.5 bg-white border border-black/15 rounded-2xl p-4 sm:p-5 shadow-xs page-break-avoid">
+            <div class="flex items-center justify-between border-b border-black/10 pb-2.5">
+              <h3 class="text-xs font-black uppercase tracking-wider text-[#0C0E08] flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black">3</span>
+                <span>PHẦN 3: PHÂN TÍCH CHUYÊN ĐỀ (CHI TIẾT TỪNG CHỈ SỐ)</span>
+              </h3>
+              <span class="text-[10px] text-[#0C0E08]/70 font-bold bg-[#EFECE6] px-2 py-0.5 rounded no-print">Thống kê mô tả &amp; Phân rã nhóm</span>
+            </div>
+            <div id="s5-p3-thematic-container" class="space-y-4 text-xs"></div>
+          </div>
+
+          <!-- ================= PHẦN 4: KẾT LUẬN ================= -->
+          <div class="space-y-3 bg-white border border-black/15 rounded-2xl p-4 sm:p-5 shadow-xs page-break-avoid">
+            <div class="flex items-center justify-between border-b border-black/10 pb-2.5">
+              <h3 class="text-xs font-black uppercase tracking-wider text-[#0C0E08] flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black">4</span>
+                <span>PHẦN 4: KẾT LUẬN (NHẬN ĐỊNH TỪ DỮ LIỆU THỰC TẾ)</span>
+              </h3>
+              <span class="text-[10px] text-[#0C0E08]/70 font-bold bg-[#EFECE6] px-2 py-0.5 rounded no-print">Đồng bộ 100% dữ liệu</span>
+            </div>
+            <div id="s5-p4-conclusions-container" class="space-y-2.5 text-xs text-[#0C0E08]/85"></div>
+            <div id="s5-p4-ai-insights-box" class="hidden mt-3 p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl space-y-1.5">
+              <div class="flex items-center gap-1.5 text-xs font-extrabold text-emerald-950">
+                <span>🤖 Nhận định Điều hành AI (Step 4 Insights):</span>
+              </div>
+              <div id="s5-p4-ai-insights-text" class="text-xs leading-relaxed text-slate-800 space-y-2"></div>
+            </div>
+          </div>
+
+          <!-- ================= PHẦN 5: ĐỀ XUẤT HÀNH ĐỘNG ================= -->
+          <div class="space-y-3 bg-white border border-black/15 rounded-2xl p-4 sm:p-5 shadow-xs page-break-avoid">
+            <div class="flex items-center justify-between border-b border-black/10 pb-2.5">
+              <h3 class="text-xs font-black uppercase tracking-wider text-[#0C0E08] flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black">5</span>
+                <span>PHẦN 5: ĐỀ XUẤT HÀNH ĐỘNG (KÈM ƯU TIÊN VÀ CHỈ SỐ ĐO LƯỜNG)</span>
+              </h3>
+              <span class="text-[10px] text-[#0C0E08]/70 font-bold bg-[#EFECE6] px-2 py-0.5 rounded no-print">Phân cấp &amp; KPI</span>
+            </div>
+            <div class="overflow-x-auto border border-black/10 rounded-xl">
+              <table class="w-full text-xs text-left" id="s5-p5-actions-table">
+                <thead class="bg-[#1B365D] text-white font-bold text-[11px]">
+                  <tr>
+                    <th class="py-2.5 px-3 text-center w-12">STT</th>
+                    <th class="py-2.5 px-3">Khuyến nghị quản trị</th>
+                    <th class="py-2.5 px-3 text-center w-36">Mức độ ưu tiên</th>
+                    <th class="py-2.5 px-3">Chỉ số đo lường (KPI)</th>
+                  </tr>
+                </thead>
+                <tbody id="s5-p5-actions-tbody" class="divide-y divide-black/10 text-[11px]"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ================= PHẦN 6: CHI TIẾT BỘ DỮ LIỆU & THỐNG KÊ KỸ THUẬT ================= -->
+          <div class="space-y-4 bg-white border border-black/15 rounded-2xl p-4 sm:p-5 shadow-xs page-break-avoid">
+            <div class="flex items-center justify-between border-b border-black/10 pb-2.5">
+              <h3 class="text-xs font-black uppercase tracking-wider text-[#0C0E08] flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-xs font-black">6</span>
+                <span>PHẦN 6: CHI TIẾT BỘ DỮ LIỆU &amp; THỐNG KÊ KỸ THUẬT</span>
+              </h3>
+              <span class="text-[10px] text-[#0C0E08]/70 font-bold bg-[#EFECE6] px-2 py-0.5 rounded no-print">Toàn vẹn &amp; Thống kê</span>
+            </div>
+
+            <!-- 6.1 Thông tin làm sạch dữ liệu -->
+            <div class="space-y-1.5">
+              <h4 class="text-xs font-extrabold text-[#0C0E08] flex items-center gap-1.5">
+                <span>🧹 6.1. Thông tin làm sạch dữ liệu</span>
+              </h4>
+              <div class="overflow-x-auto border border-black/10 rounded-xl">
+                <table class="w-full text-xs text-left" id="s5-p6-clean-table">
+                  <thead class="bg-[#1B365D] text-white font-bold text-[11px]">
+                    <tr>
+                      <th class="py-2 px-2.5 text-center">Dòng đầu vào</th>
+                      <th class="py-2 px-2.5 text-center">Dòng sau sạch</th>
+                      <th class="py-2 px-2.5 text-center">Số cột</th>
+                      <th class="py-2 px-2.5 text-center">Trùng lặp loại</th>
+                      <th class="py-2 px-2.5 text-center">Ô trống còn lại</th>
+                      <th class="py-2 px-2.5 text-center">Outlier IQR</th>
+                    </tr>
+                  </thead>
+                  <tbody id="s5-p6-clean-tbody" class="text-[11px] text-center font-mono"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 6.2 Nhận xét thống kê tự động -->
+            <div class="space-y-1.5 pt-1">
+              <h4 class="text-xs font-extrabold text-[#0C0E08] flex items-center gap-1.5">
+                <span>📈 6.2. Nhận xét thống kê tự động</span>
+              </h4>
+              <div id="s5-p6-stats-comment" class="text-xs leading-relaxed text-[#0C0E08]/85 p-3.5 bg-[#F7F7F4] rounded-xl border border-black/10 font-medium space-y-2"></div>
+            </div>
+
+            <!-- 6.3 Bảng Tổng hợp theo nhóm -->
+            <div class="space-y-1.5 pt-1">
+              <h4 class="text-xs font-extrabold text-[#0C0E08] flex items-center gap-1.5">
+                <span>🏷️ 6.3. Bảng Tổng hợp theo nhóm (<span id="s5-p6-grp-col-name">Nhóm</span>)</span>
+              </h4>
+              <div class="overflow-x-auto border border-black/10 rounded-xl">
+                <table class="w-full text-xs text-left" id="s5-p6-group-table">
+                  <thead class="bg-[#1B365D] text-white font-bold text-[11px]">
+                    <tr>
+                      <th class="py-2 px-3">Nhóm</th>
+                      <th class="py-2 px-3 text-right">Giá trị tổng hợp</th>
+                      <th class="py-2 px-3 text-center">Số dòng được tính</th>
+                    </tr>
+                  </thead>
+                  <tbody id="s5-p6-group-tbody" class="divide-y divide-black/10 text-[11px]"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 6.4 Bảng Thống kê theo từng cột -->
+            <div class="space-y-1.5 pt-1">
+              <h4 class="text-xs font-extrabold text-[#0C0E08] flex items-center gap-1.5">
+                <span>📋 6.4. Bảng Thống kê theo từng cột trong bộ dữ liệu</span>
+              </h4>
+              <div class="overflow-x-auto border border-black/10 rounded-xl max-h-72">
+                <table class="w-full text-xs text-left" id="s5-p6-colstats-table">
+                  <thead class="bg-[#1B365D] text-white font-bold text-[11px] sticky top-0">
+                    <tr>
+                      <th class="py-2 px-3">Tên cột dữ liệu</th>
+                      <th class="py-2 px-3 text-center">Ô trống</th>
+                      <th class="py-2 px-3 text-center">Giá trị khác nhau</th>
+                      <th class="py-2 px-3 text-right">Trung bình</th>
+                      <th class="py-2 px-3 text-right">Nhỏ nhất</th>
+                      <th class="py-2 px-3 text-right">Lớn nhất</th>
+                    </tr>
+                  </thead>
+                  <tbody id="s5-p6-colstats-tbody" class="divide-y divide-black/10 text-[11px]"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= BẢNG NGOẠI LỆ / TỒN KHO & BỔ TRỢ (NẾU CÓ SKU/TỒN KHO) ================= -->
+          <div id="s5-sku-inv-section" class="space-y-3.5 pt-1">
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+              <div>
+                <h3 class="text-xs font-black uppercase tracking-wider text-[#0C0E08] flex items-center gap-1.5" id="s5-table-title">
+                  <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping" id="s5-table-ping"></span>
+                  <span id="s5-table-title-text">Bảng Dữ liệu Chi tiết — Quản trị bằng Ngoại lệ (Management by Exception)</span>
+                </h3>
+                <p class="text-[11px] text-[#0C0E08]/70 mt-0.5" id="s5-table-subtitle">Tô màu có điều kiện: Đỏ (Đứt hàng / Nghiêm trọng) • Vàng (Cận date / Cảnh báo) • Xanh (An toàn)</p>
+              </div>
+
+              <!-- Thanh tìm kiếm & Nút tải cleaned_sales.csv -->
+              <div class="flex flex-wrap items-center gap-2 no-print">
+                <div class="relative w-64 sm:w-72">
+                  <input type="text" id="s5-risk-search" oninput="onS5RiskSearchInput(this.value)" placeholder="🔍 Tìm kiếm trong bảng..." class="w-full bg-white border border-black/20 focus:border-black rounded-lg px-3 py-1.5 text-xs text-[#0C0E08] focus:outline-none transition shadow-xs">
+                </div>
+                <a href="/cleaned_sales.csv" download="cleaned_sales.csv" class="text-xs font-bold bg-[#0B0D08] hover:bg-black/80 text-[#D4EE0E] px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-xs">
+                  <span>📥 Tải cleaned_sales.csv</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- BỘ LỌC NHANH THEO TRẠNG THÁI (FILTER CHIPS) -->
+            <div class="flex flex-wrap items-center gap-2 text-xs no-print" id="s5-filter-chips-container">
+              <span class="text-[10px] font-bold text-[#0C0E08]/60 uppercase">Lọc nhanh:</span>
+              <button id="btn-chip-all" onclick="setS5RiskFilter('ALL')" class="px-3 py-1 rounded-lg font-bold bg-[#0B0D08] text-[#D4EE0E] border border-black transition shadow-2xs">
+                Tất cả (<span id="chip-cnt-all">0</span>)
+              </button>
+              <button id="btn-chip-out" onclick="setS5RiskFilter('OUT_OF_STOCK')" class="px-3 py-1 rounded-lg font-bold bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 transition shadow-2xs">
+                🚨 Đứt hàng (<span id="chip-cnt-out">0</span>)
+              </button>
+              <button id="btn-chip-exp" onclick="setS5RiskFilter('NEAR_EXPIRY')" class="px-3 py-1 rounded-lg font-bold bg-white hover:bg-amber-50 text-amber-700 border border-amber-300 transition shadow-2xs">
+                ⚠️ Cận date / Cảnh báo (<span id="chip-cnt-exp">0</span>)
+              </button>
+              <button id="btn-chip-safe" onclick="setS5RiskFilter('SAFE')" class="px-3 py-1 rounded-lg font-bold bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 transition shadow-2xs">
+                ✓ An toàn (<span id="chip-cnt-safe">0</span>)
+              </button>
+            </div>
+
+            <!-- BẢNG DỮ LIỆU CONDITIONAL FORMATTING -->
+            <div class="bg-white border border-black/15 rounded-xl overflow-hidden shadow-xs page-break-avoid">
+              <div class="overflow-x-auto">
+                <table class="w-full text-[11px] text-left" id="s5-table-risk">
+                  <thead class="bg-[#F7F7F4] font-bold border-b border-black/10 text-[#0C0E08]/85" id="s5-thead-risk">
+                    <tr>
+                      <th class="py-2.5 px-3 text-center w-10">#</th>
+                      <th class="py-2.5 px-3 whitespace-nowrap">Mã SKU</th>
+                      <th class="py-2.5 px-3">Tên Sản phẩm &amp; Danh mục</th>
+                      <th class="py-2.5 px-3 text-right whitespace-nowrap">Tồn khả dụng</th>
+                      <th class="py-2.5 px-3 text-right whitespace-nowrap">Tốc độ bán / Nhu cầu</th>
+                      <th class="py-2.5 px-3 text-right whitespace-nowrap">Số ngày tồn (DOI)</th>
+                      <th class="py-2.5 px-3 text-center whitespace-nowrap">Hạn dùng / Lead-time</th>
+                      <th class="py-2.5 px-3 text-right whitespace-nowrap">Giá trị tồn kho</th>
+                      <th class="py-2.5 px-3 text-center whitespace-nowrap">Trạng thái rủi ro</th>
+                      <th class="py-2.5 px-3">Khuyến nghị điều hành BI</th>
+                    </tr>
+                  </thead>
+                  <tbody id="s5-tbody-risk" class="divide-y divide-black/10"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 2 Bảng Bổ trợ (Top 5 VIP & Top 5 Sản phẩm chủ lực) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-1">
+              <div class="bg-white border border-black/15 rounded-xl overflow-hidden shadow-xs page-break-avoid">
+                <div class="px-3.5 py-2 bg-[#EFECE6] border-b border-black/10 flex items-center justify-between">
+                  <strong class="text-xs font-bold text-[#0C0E08]">👑 Top 5 Khách hàng VIP (Tier A)</strong>
+                  <button id="btn-toggle-s5-vip" onclick="toggleS5VipTable()" class="text-[10px] font-bold bg-white border border-black/15 px-2 py-0.5 rounded hover:bg-black/5 no-print">Xem tất cả</button>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-[11px] text-left">
+                    <thead class="bg-[#F7F7F4] font-bold border-b border-black/10">
+                      <tr>
+                        <th class="py-2 px-2.5 text-center">#</th>
+                        <th class="py-2 px-2.5">Khách hàng</th>
+                        <th class="py-2 px-2.5 text-right">Doanh thu</th>
+                        <th class="py-2 px-2.5 text-right">Tỷ trọng</th>
+                        <th class="py-2 px-2.5 text-right">Margin</th>
+                        <th class="py-2 px-2.5 text-center">Hạng</th>
+                      </tr>
+                    </thead>
+                    <tbody id="s5-tbody-vip" class="divide-y divide-black/10"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="bg-white border border-black/15 rounded-xl overflow-hidden shadow-xs page-break-avoid">
+                <div class="px-3.5 py-2 bg-[#EFECE6] border-b border-black/10 flex items-center justify-between">
+                  <strong class="text-xs font-bold text-[#0C0E08]">⭐ Top 5 Sản phẩm Chủ lực</strong>
+                  <button id="btn-toggle-s5-prod" onclick="toggleS5ProdTable()" class="text-[10px] font-bold bg-white border border-black/15 px-2 py-0.5 rounded hover:bg-black/5 no-print">Xem tất cả</button>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-[11px] text-left">
+                    <thead class="bg-[#F7F7F4] font-bold border-b border-black/10">
+                      <tr>
+                        <th class="py-2 px-2.5 text-center">#</th>
+                        <th class="py-2 px-2.5">Sản phẩm</th>
+                        <th class="py-2 px-2.5 text-right">SL / Đơn</th>
+                        <th class="py-2 px-2.5 text-right">Doanh thu</th>
+                        <th class="py-2 px-2.5 text-right">Tỷ trọng</th>
+                        <th class="py-2 px-2.5 text-right">Margin</th>
+                      </tr>
+                    </thead>
+                    <tbody id="s5-tbody-prod" class="divide-y divide-black/10"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= PHÊ DUYỆT BAN HÀNH & TẢI XUỐNG TỆP TIN ================= -->
+          <div class="bg-white border-2 border-[#D4EE0E] rounded-2xl p-5 sm:p-6 shadow-sm space-y-4 page-break-avoid">
+            <div class="flex items-center justify-between border-b border-black/10 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-[#0B0D08] text-[#D4EE0E] flex items-center justify-center text-sm font-black">✍️</span>
+                <div>
+                  <h3 class="text-sm font-black text-[#0C0E08] uppercase">Khung Phê duyệt Ban hành &amp; Tải Xuất Tệp Tin</h3>
+                  <p class="text-[11px] text-[#0C0E08]/70">Xác thực người lập biểu, người phê duyệt và tải xuống các ấn phẩm Word / Excel</p>
+                </div>
+              </div>
+              <span class="text-xs font-bold bg-[#D4EE0E] text-[#0C0E08] px-3 py-1 rounded-md">
+                Ban Giám Đốc Phê Duyệt
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div class="space-y-1.5">
+                <label class="font-bold text-[#0C0E08] block">Người phê duyệt ban hành:</label>
+                <input type="text" id="s5-approver-name" value="Ban Giám Đốc" class="w-full bg-[#F7F7F4] border border-black/15 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-black">
+              </div>
+              <div class="space-y-1.5">
+                <label class="font-bold text-[#0C0E08] block">Chức vụ / Đơn vị:</label>
+                <input type="text" id="s5-approver-title" value="Trưởng phòng Kinh doanh (TPKD)" class="w-full bg-[#F7F7F4] border border-black/15 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-black">
+              </div>
+              <div class="md:col-span-2 space-y-1.5">
+                <label class="font-bold text-[#0C0E08] block">Ghi chú &amp; Chỉ đạo điều hành:</label>
+                <input type="text" id="s5-approval-notes" value="Đồng ý phê duyệt số liệu kinh doanh, chính sách chiết khấu và ban hành báo cáo chính thức." class="w-full bg-[#F7F7F4] border border-black/15 rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none focus:border-black">
+              </div>
+            </div>
+
+            <!-- TẬP HỢP CÁC NÚT TẢI XUỐNG CHÍNH THỨC -->
+            <div class="pt-2 border-t border-black/10">
+              <div class="text-[11px] font-extrabold uppercase text-[#0C0E08]/70 mb-2.5">Bộ tệp kết quả sẵn sàng tải về:</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <a id="dl-docx" href="/BaoCao_PhanTich_HieuSuat.docx" download="BaoCao_PhanTich_HieuSuat.docx" onclick="downloadWordReport(); return false;" class="bg-[#1B365D] hover:bg-[#152a48] text-white p-3.5 rounded-xl shadow-xs transition block group">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-extrabold text-white text-xs">📄 Báo cáo Word</span>
+                    <span class="text-xs">⬇️</span>
+                  </div>
+                  <strong class="block text-sm font-black text-[#D4EE0E]">.DOCX Hoàn chỉnh</strong>
+                  <span id="dl-docx-desc" class="text-[10px] text-white/80 mt-1 block">Chuẩn 6 phần BI + Bảng biểu</span>
+                </a>
+
+                <a id="dl-excel" href="/BaoCao_DoanhThu_TongHop.xlsx" download="BaoCao_DoanhThu_TongHop.xlsx" onclick="downloadExcelReport(); return false;" class="bg-emerald-800 hover:bg-emerald-900 text-white p-3.5 rounded-xl shadow-xs transition block group">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-extrabold text-white text-xs">📊 Sổ cái Excel</span>
+                    <span class="text-xs">⬇️</span>
+                  </div>
+                  <strong class="block text-sm font-black text-[#D4EE0E]">.XLSX Đa Sheet</strong>
+                  <span id="dl-excel-desc" class="text-[10px] text-white/80 mt-1 block">TongQuan_KPI &amp; Phân nhóm</span>
+                </a>
+
+                <a href="/cleaned_sales.csv" download="cleaned_sales.csv" class="bg-[#0B0D08] hover:bg-black text-[#D4EE0E] p-3.5 rounded-xl shadow-xs transition block group">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-extrabold text-[#D4EE0E] text-xs">📥 Dữ liệu sạch</span>
+                    <span class="text-xs">⬇️</span>
+                  </div>
+                  <strong class="block text-sm font-black text-white">cleaned_sales.csv</strong>
+                  <span class="text-[10px] text-white/70 mt-1 block">100% bản ghi đã kiểm định</span>
+                </a>
+
+                <a id="dl-audit" href="/audit_log.json" download="audit_log.json" class="bg-[#F7F7F4] hover:bg-[#EFECE6] text-[#0C0E08] p-3.5 rounded-xl border border-black/15 shadow-xs transition block group">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="font-extrabold text-[#0C0E08] text-xs">🕵️ Audit Log</span>
+                    <span class="text-xs">⬇️</span>
+                  </div>
+                  <strong class="block text-sm font-black text-[#0C0E08]">audit_log.json</strong>
+                  <span class="text-[10px] text-[#0C0E08]/60 mt-1 block">Nhật ký truy vết quy trình</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BOTTOM BLACK CONFIRM GATE BAR -->
+      <div class="bg-[#0B0D08] text-white px-6 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#D4EE0E] animate-pulse"></span>
+          <span id="gate-step-desc" class="text-xs font-semibold text-white/80">Bước 1: Kiểm tra cấu trúc bảng thô, thông tin DN &amp; ánh xạ cột</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <button onclick="rerunCurrentStep()" id="btn-gate-retry" class="text-xs font-bold bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition">
+            ↺ Chạy lại Bước 1
+          </button>
+          <button onclick="gateApprove()" id="btn-gate-ok" class="text-xs sm:text-sm font-black bg-[#D4EE0E] hover:bg-white text-[#0C0E08] px-6 py-2 rounded-lg shadow transition">
+            ✓ Duyệt Bước 1 &amp; Tiếp tục →
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: AUDIT LOG VIEWER -->
+  <div id="modal-audit" onclick="if(event.target === this) closeAuditModal()" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-[#F7F7F4] rounded-2xl max-w-2xl w-full p-6 border border-black/20 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-black/10 pb-3">
+        <h3 class="font-black text-base">🕵️ Nhật ký Truy vết Agent (Audit Log)</h3>
+        <button onclick="closeAuditModal()" class="bg-[#0B0D08] text-white text-xs font-bold px-3 py-1 rounded-md">✕ Đóng</button>
+      </div>
+      <div id="audit-modal-list" class="space-y-2 max-h-80 overflow-y-auto text-xs font-mono"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: DATA VALIDATION WARNING (Visual halt when file is empty/invalid) -->
+  <div id="modal-validation-warning" onclick="if(event.target === this) closeValidationModal()" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border-2 border-rose-500 animate-enter space-y-4">
+      <div class="flex items-center gap-3 text-rose-600">
+        <div class="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center text-2xl font-black">
+          🛑
+        </div>
+        <div>
+          <h3 id="modal-val-title" class="text-base font-black text-rose-950 uppercase tracking-tight">Dừng quy trình: Tệp không có dữ liệu</h3>
+          <p class="text-xs text-rose-800/80">Không thể tiếp tục sang bước tiếp theo với dữ liệu rỗng</p>
+        </div>
+      </div>
+      <div class="bg-rose-50 rounded-xl p-4 border border-rose-200 text-xs text-rose-900 space-y-2">
+        <div class="font-bold flex items-center gap-1.5 text-rose-950">
+          <span>Lý do cụ thể:</span>
+        </div>
+        <div id="modal-val-reason" class="font-medium leading-relaxed bg-white/80 p-2.5 rounded-lg border border-rose-200 text-rose-950">
+          Tệp tải lên rỗng (0 dòng) hoặc toàn bộ giá trị bị trống/null.
+        </div>
+        <p class="text-[11px] text-rose-800">
+          Hệ thống đã tự động dừng quy trình để bảo toàn tính toàn vẹn dữ liệu, tránh phát sinh lỗi phân tích hoặc xuất báo cáo giả định.
+        </p>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button onclick="closeValidationModal()" class="px-3.5 py-2 rounded-lg text-xs font-bold text-black/70 hover:bg-black/5">
+          Đóng thông báo
+        </button>
+        <button onclick="document.getElementById('file-input').click(); closeValidationModal();" class="px-4 py-2 rounded-lg text-xs font-black bg-rose-600 hover:bg-rose-700 text-white shadow">
+          📁 Tải tệp khác
+        </button>
+        <button onclick="loadSampleWorkbook(); closeValidationModal();" class="px-4 py-2 rounded-lg text-xs font-black bg-[#0B0D08] hover:bg-black text-[#D4EE0E] shadow">
+          ⚡ Nạp file mẫu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <script src="app.js?v=20261119_generic_v8"></script>
+</body>
+</html>

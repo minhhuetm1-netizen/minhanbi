@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/BaoCao_(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/MinhAn_(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/audit_log.(.*)",
+      "destination": "/api/index.py"
+    }
+  ]
+}

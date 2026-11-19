@@ -1,0 +1,9 @@
+﻿ma_sp,ton_kha_dung,kho_luu_tru,thoi_gian_giao_san_co_ngay,thoi_gian_nhap_hang_ngay,trang_thai_kho,canh_bao_van_hanh
+LAP-DELL-5540,15,Kho Tổng Hà Nội,1,7,Còn hàng sẵn,Đủ cung cấp đơn hàng dưới 15 chiếc ngay trong 24h
+LAP-LEN-T14,4,Kho Đà Nẵng,2,14,Sắp hết hàng,Nếu đặt > 4 chiếc cần tối thiểu 14 ngày nhập khẩu
+SRV-DELL-R750,2,Kho Tổng Hà Nội,3,21,Hạn chế,"Server cấu hình dự án, lắp ráp & burn-in test cần 3 ngày"
+SW-CISCO-C9200,8,Kho TP.HCM,1,10,Còn hàng sẵn,Sẵn sàng giao ngay
+FW-FORTI-60F,10,Kho Tổng Hà Nội,1,5,Còn hàng sẵn,Sẵn kho đủ đáp ứng
+SVC-SEC-1Y,999,Trung tâm Dịch vụ,2,2,Dịch vụ sẵn sàng,Cần chốt lịch kỹ sư trước 48h
+SVC-MAINT-247,999,Trung tâm Dịch vụ,1,1,Dịch vụ sẵn sàng,Kích hoạt hợp đồng trong 24h
+LIC-M365-BUS,250,Kho License Kỹ thuật số,1,1,Còn hàng sẵn,Cấp license online trong ngày
