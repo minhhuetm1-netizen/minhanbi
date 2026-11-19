@@ -32,8 +32,9 @@ SERVER_CACHE = {
 }
 
 class MinhAnRequestHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=STATIC_DIR, **kwargs)
+    def __init__(self, *args, directory=None, **kwargs):
+        target_dir = directory or STATIC_DIR
+        super().__init__(*args, directory=target_dir, **kwargs)
 
     def _paginate_data(self, source, sheet_name, page, page_size):
         page_size = max(10, min(page_size, 200))
